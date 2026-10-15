@@ -16,6 +16,15 @@ unreviewed upstream bump can change RML/RCSS behaviour or the UFolioWidget API u
 consuming project. The fork exists so the plugin lives in the shared engine location
 (`HF_Plugins`) instead of per-project copies.
 
+## Carried patches (on top of the pinned upstream SHA)
+
+- WI-1580 t112: `Source/Folio/Folio.Build.cs` adds `RuntimeDependencies` for `$(PluginDir)/rcss/...` and
+  `$(PluginDir)/fonts/...` (UFS), and `FolioDocumentPath.cpp` `IsStaged()` treats a file under the plugin
+  root's `rcss`/`fonts` as staged. Reason: as an engine-fork plugin Folio sits outside the project, so the
+  Content-relative `DirectoriesToAlwaysStageAsUFS` cannot name its `/folio/` root, and `Folio.Document.Validation`
+  failed ("a staged document is not warned about"). Upstream (project-local plugin) works via
+  `../Plugins/Folio/*` staging lines. Candidate to offer upstream (WI-1579).
+
 ## Rules
 
 - Never push to Fogspire. Push only to `scott-hf/Folio`.

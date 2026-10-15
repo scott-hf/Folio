@@ -428,6 +428,26 @@ namespace
 		FString File = AbsoluteFile;
 		FPaths::NormalizeFilename(File);
 
+		// HF patch (WI-1580 t112): the plugin's own rcss and fonts are staged by Folio.Build.cs
+		// RuntimeDependencies, so they are packaged wherever the plugin lives. Without this an
+		// engine-fork plugin (outside the project, so unreachable from the Content-relative setting
+		// below) would report its own /folio/ documents as unstaged. The plugin's examples are not
+		// staged and stay reported.
+		if (FFolioModule::IsAvailable() && !FFolioModule::Get().GetPluginRoot().IsEmpty())
+		{
+			for (const TCHAR* Shipped : { TEXT("rcss"), TEXT("fonts") })
+			{
+				FString Root = FFolioModule::Get().GetPluginRoot() / Shipped;
+				FPaths::NormalizeDirectoryName(Root);
+				Root += TEXT("/");
+
+				if (File.StartsWith(Root, ESearchCase::IgnoreCase))
+				{
+					return true;
+				}
+			}
+		}
+
 		for (const FDirectoryPath& Staged : Packaging->DirectoriesToAlwaysStageAsUFS)
 		{
 			if (Staged.Path.IsEmpty())

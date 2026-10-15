@@ -69,6 +69,14 @@ public class Folio : ModuleRules
 		// in Internal; this one was never promoted.
 		PrivateIncludePaths.Add(Path.Combine(EngineDirectory, "Source", "Runtime", "Renderer", "Private"));
 
+		// HF patch (WI-1580 t112): the plugin stages its own runtime files. The /folio/ root and the
+		// theme/font lookups read <PluginRoot>/rcss and <PluginRoot>/fonts through the file interface,
+		// and an engine-fork plugin cannot name them in DirectoriesToAlwaysStageAsUFS (that setting is
+		// Content-relative, so it only reaches a plugin that sits inside the project). UFS because they
+		// are read by path, not through the pak's .uasset mount.
+		RuntimeDependencies.Add("$(PluginDir)/rcss/...", StagedFileType.UFS);
+		RuntimeDependencies.Add("$(PluginDir)/fonts/...", StagedFileType.UFS);
+
 		// Hot reload only. DirectoryWatcher is a Developer module and does not exist in a game
 		// build, which is what the -uidev loose-file override covers instead.
 		if (Target.bBuildEditor)
